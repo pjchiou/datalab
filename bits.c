@@ -111,7 +111,7 @@ NOTES:
  */
 int absVal(int x)
 {
-    return 42;
+    return (x ^ (x >> 31)) + (~(x >> 31) + 1);
 }
 
 /*
@@ -124,7 +124,8 @@ int absVal(int x)
  */
 int addOK(int x, int y)
 {
-    return 42;
+    int z = x + y;
+    return !(!(x >> 31 ^ y >> 31) & !!(x >> 31 ^ z >> 31));
 }
 
 /*
@@ -137,7 +138,11 @@ int addOK(int x, int y)
  */
 int allEvenBits(int x)
 {
-    return 42;
+    x &= (x >> 16);
+    x &= (x >> 8);
+    x &= (x >> 4);
+    x &= (x >> 2);
+    return (x & 0x1);
 }
 
 /*
@@ -150,7 +155,11 @@ int allEvenBits(int x)
  */
 int allOddBits(int x)
 {
-    return 42;
+    x &= (x >> 16);
+    x &= (x >> 8);
+    x &= (x >> 4);
+    x &= (x >> 2);
+    return (x & 0x2) >> 1;
 }
 
 /*
@@ -163,7 +172,11 @@ int allOddBits(int x)
  */
 int anyEvenBit(int x)
 {
-    return 42;
+    x |= (x >> 16);
+    x |= (x >> 8);
+    x |= (x >> 4);
+    x |= (x >> 2);
+    return (x & 0x1);
 }
 
 /*
@@ -176,7 +189,11 @@ int anyEvenBit(int x)
  */
 int anyOddBit(int x)
 {
-    return 42;
+    x |= (x >> 16);
+    x |= (x >> 8);
+    x |= (x >> 4);
+    x |= (x >> 2);
+    return ((x & 0x2) >> 1);
 }
 
 /*
@@ -188,7 +205,12 @@ int anyOddBit(int x)
  */
 int bang(int x)
 {
-    return 42;
+    x |= (x >> 16);
+    x |= (x >> 8);
+    x |= (x >> 4);
+    x |= (x >> 2);
+    x |= (x >> 1);
+    return (~x & 0x1);
 }
 
 /*
