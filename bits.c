@@ -274,7 +274,7 @@ int bitMatch(int x, int y)
  */
 int bitNor(int x, int y)
 {
-    return 42;
+    return (~x & ~y);
 }
 
 /*
@@ -286,7 +286,7 @@ int bitNor(int x, int y)
  */
 int bitOr(int x, int y)
 {
-    return 42;
+    return ~(~x & ~y);
 }
 
 /*
@@ -298,7 +298,12 @@ int bitOr(int x, int y)
  */
 int bitParity(int x)
 {
-    return 42;
+    x ^= x >> 1;
+    x ^= x >> 2;
+    x ^= x >> 4;  // shift the bit to the rightest bit of each byte
+    x ^= x >> 8;  // shift to even bytes.
+    x ^= x >> 16;
+    return (x & 0x1);
 }
 
 /*
