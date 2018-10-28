@@ -249,7 +249,7 @@ int bitCount(int x)
  */
 int bitMask(int highbit, int lowbit)
 {
-    return 42;
+    return ((~0 << lowbit) & (~0 >> (31 - highbit)));
 }
 
 /*
@@ -262,7 +262,7 @@ int bitMask(int highbit, int lowbit)
  */
 int bitMatch(int x, int y)
 {
-    return 42;
+    return ~(~(x & y) & ~(~x & ~y));
 }
 
 /*
