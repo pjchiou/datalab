@@ -328,7 +328,7 @@ int bitReverse(int x)
  */
 int bitXor(int x, int y)
 {
-    return 42;
+    return ~(x & y) & ~(~x & ~y);
 }
 
 /*
@@ -342,7 +342,27 @@ int bitXor(int x, int y)
  */
 int byteSwap(int x, int n, int m)
 {
-    return 42;
+    int diff, swap, filterN, filterM, y;
+
+    m <<= 3;
+    n <<= 3;
+    diff = m + ~n + 1;
+    swap = diff >> 31;
+
+    m ^= (n & swap);
+    n ^= (m & swap);
+    m ^= (n & swap);
+
+    filterN = (0xff << n);
+    filterM = (0xff << m);
+
+    y = x & ~filterN & ~filterM;
+    diff = (diff ^ swap) + ~swap + 1;
+
+    y |= ((x >> diff) & filterN);
+    y |= ((x << diff) & filterM);
+
+    return y;
 }
 
 /*
@@ -354,7 +374,10 @@ int byteSwap(int x, int n, int m)
  */
 int conditional(int x, int y, int z)
 {
-    return 42;
+    int diff = z + ~y + 1, con = !x;
+
+    diff = diff & (((~con) + 1) >> 31);
+    return y + diff;
 }
 
 /*
