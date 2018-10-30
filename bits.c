@@ -316,7 +316,45 @@ int bitParity(int x)
  */
 int bitReverse(int x)
 {
-    return 42;
+    int filter07, filter16, filter25, filter34, y, tempfilter;
+
+    tempfilter = 0x1;
+    tempfilter |= tempfilter << 8;
+    tempfilter |= tempfilter << 16;
+    filter07 = (x ^ (x >> 7)) & tempfilter;
+    filter07 |= filter07 << 7;
+
+    tempfilter = 0x2;
+    tempfilter |= tempfilter << 8;
+    tempfilter |= tempfilter << 16;
+    filter16 = (x ^ (x >> 5)) & tempfilter;
+    filter16 |= filter16 << 5;
+
+    tempfilter = 0x4;
+    tempfilter |= tempfilter << 8;
+    tempfilter |= tempfilter << 16;
+    filter25 = (x ^ (x >> 3)) & tempfilter;
+    filter25 |= filter25 << 3;
+
+    tempfilter = 0x8;
+    tempfilter |= tempfilter << 8;
+    tempfilter |= tempfilter << 16;
+    filter34 = (x ^ (x >> 1)) & tempfilter;
+    filter34 |= filter34 << 1;
+
+    x ^= (filter07 | filter16 | filter25 | filter34);
+    y = x & 0xff;
+    y <<= 8;
+    x >>= 8;
+    y |= x & 0xff;
+    y <<= 8;
+    x >>= 8;
+    y |= x & 0xff;
+    y <<= 8;
+    x >>= 8;
+    y |= x & 0xff;
+
+    return y;
 }
 
 /*
