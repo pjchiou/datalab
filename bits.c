@@ -441,7 +441,7 @@ int countLeadingZero(int x)
  */
 int copyLSB(int x)
 {
-    return 42;
+    return (~(x & 0x1)) + 1;
 }
 
 /*
@@ -453,7 +453,7 @@ int copyLSB(int x)
  */
 int distinctNegation(int x)
 {
-    return 42;
+    return !!(x ^ (~x + 1));
 }
 
 /*
@@ -466,7 +466,13 @@ int distinctNegation(int x)
  */
 int dividePower2(int x, int n)
 {
-    return 42;
+    int Neg = x >> 31, Neg2;
+
+    x = (x ^ Neg) + (~Neg + 1);
+    x >>= n;
+    Neg2 = (x >> 31) ^ Neg;
+    x = (x ^ Neg2) + (~Neg2 + 1);
+    return x;
 }
 
 /*
@@ -477,7 +483,11 @@ int dividePower2(int x, int n)
  */
 int evenBits(void)
 {
-    return 42;
+    int filter = 0x55;
+    filter |= filter << 8;
+    filter |= filter << 16;
+
+    return filter;
 }
 
 /*
@@ -493,7 +503,14 @@ int evenBits(void)
  */
 int ezThreeFourths(int x)
 {
-    return 42;
+    int Neg = x >> 31, Neg2;
+
+    x = (x ^ Neg) + (~Neg + 1);
+    x >>= 2;
+    Neg2 = (x >> 31) ^ Neg;
+    x = (x ^ Neg2) + (~Neg2 + 1);
+    x += (x << 1);
+    return x;
 }
 
 /*
