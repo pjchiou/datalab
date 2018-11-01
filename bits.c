@@ -466,12 +466,11 @@ int distinctNegation(int x)
  */
 int dividePower2(int x, int n)
 {
-    int Neg = x >> 31, Neg2;
+    int Neg = x >> 31, filter = (0x1 << n) + (~0), Mod;
 
-    x = (x ^ Neg) + (~Neg + 1);
+    Mod = filter & x;
     x >>= n;
-    Neg2 = (x >> 31) ^ Neg;
-    x = (x ^ Neg2) + (~Neg2 + 1);
+    x += ((!!Mod) & Neg);
     return x;
 }
 
@@ -503,13 +502,13 @@ int evenBits(void)
  */
 int ezThreeFourths(int x)
 {
-    int Neg = x >> 31, Neg2;
+    int Neg, filter = 0x3, Mod;
 
-    x = (x ^ Neg) + (~Neg + 1);
-    x >>= 2;
-    Neg2 = (x >> 31) ^ Neg;
-    x = (x ^ Neg2) + (~Neg2 + 1);
     x += (x << 1);
+    Neg = x >> 31;
+    Mod = filter & x;
+    x >>= 2;
+    x += ((!!Mod) & Neg);
     return x;
 }
 
@@ -524,7 +523,11 @@ int ezThreeFourths(int x)
  */
 int fitsBits(int x, int n)
 {
-    return 42;
+    int Neg = x >> 31;
+    n += (~0);
+    x >>= n;
+
+    return !(x ^ Neg);
 }
 
 /*
@@ -537,7 +540,10 @@ int fitsBits(int x, int n)
  */
 int fitsShort(int x)
 {
-    return 42;
+    int Neg = x >> 31;
+    x >>= 15;
+
+    return !(x ^ Neg);
 }
 
 /*
