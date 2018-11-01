@@ -559,7 +559,17 @@ int fitsShort(int x)
  */
 unsigned floatAbsVal(unsigned uf)
 {
-    return 42;
+    int Exp, Man;
+
+    Exp = (uf >> 23) & 0xff;
+    Man = uf << 9;
+
+    if (Exp == 0xff && Man)
+        return (uf);
+    uf <<= 1;
+    uf >>= 1;
+
+    return uf;
 }
 
 /*
