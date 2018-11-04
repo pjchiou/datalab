@@ -586,7 +586,26 @@ unsigned floatAbsVal(unsigned uf)
  */
 int floatFloat2Int(unsigned uf)
 {
-    return 42;
+    int Sign, Exp, Man;
+
+    Sign = (uf >> 31) & 0x1;
+    Exp = ((uf >> 23) & 0xff) - (127 + 23);
+    Man = ((uf << 9) >> 9) | 0x00800000;
+
+    if (Exp < -23)
+        return (0);
+
+    if ((Sign && Exp > 8) || (!Sign && Exp > 7))
+        return (0x80000000);
+
+    if (Exp >= 0)
+        Man <<= Exp;
+    else
+        Man >>= (-Exp);
+    if (Sign)
+        Man *= -1;
+
+    return Man;
 }
 
 /*
@@ -600,7 +619,46 @@ int floatFloat2Int(unsigned uf)
  */
 unsigned floatInt2Float(int x)
 {
-    return 42;
+    int Sign, Exp = 31, Man = (0x1 << 31), Rem, pos = 8;
+    unsigned filter = 0xffffff00;
+
+    if (!x)
+        return (0);
+
+    Sign = x & 0x80000000;
+    if (Sign)
+        x *= -1;
+
+    while (!(x & Man)) {
+        pos--;
+        Man >>= 1;
+        filter >>= 1;
+    }
+    Rem = x & ~(filter | Man);
+    if (pos > 0) {
+        if (Rem > 0 && (0x1 << pos) - Rem < Rem)
+            x += (1 << pos);
+        if ((0x1 << pos) - Rem == Rem && ((x >> pos) & 0x1) == 1)
+            x += (1 << pos);
+    }
+    Man = 0x1 << 31;
+
+    while (!(x & Man)) {
+        Exp--;
+        Man >>= 1;
+    }
+
+    if (Exp > 23)
+        Man = x >> (Exp - 23);
+    else
+        Man = x << (23 - Exp);
+
+    Man &= 0x007fffff;
+
+    Exp += 127;
+    Exp <<= 23;
+
+    return Sign | Exp | Man;
 }
 
 /*
