@@ -674,7 +674,23 @@ unsigned floatInt2Float(int x)
  */
 int floatIsEqual(unsigned uf, unsigned ug)
 {
-    return 42;
+    int Exp, frac;
+    if (!((uf << 1) | (ug << 1)))
+        return (1);
+
+    Exp = (uf >> 23) & 0xff;
+    frac = uf & 0x007fffff;
+
+    if (Exp == 0xff && frac)
+        return (0);
+
+    Exp = (ug >> 23) & 0xff;
+    frac = ug & 0x007fffff;
+
+    if (Exp == 0xff && frac)
+        return (0);
+
+    return (!(uf ^ ug));
 }
 
 /*
