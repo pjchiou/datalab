@@ -706,7 +706,36 @@ int floatIsEqual(unsigned uf, unsigned ug)
  */
 int floatIsLess(unsigned uf, unsigned ug)
 {
-    return 42;
+    int signf, signg, expf, expg, fracf, fracg;
+
+    if (!((uf << 1) | (ug << 1)))
+        return (0);
+
+    signf = (uf >> 31) & 0x1;
+    signg = (ug >> 31) & 0x1;
+    expf = (uf >> 23) & 0xff;
+    expg = (ug >> 23) & 0xff;
+    fracf = uf & 0x007fffff;
+    fracg = ug & 0x007fffff;
+
+    if ((expf == 0xff && fracf) || (expg == 0xff && fracg))
+        return (0);
+
+    if (signf > signg)
+        return (1);
+    if (signf < signg)
+        return (0);
+
+    if (expf > expg)
+        return (signf);
+    if (expf < expg)
+        return (!signf);
+
+    if (fracf < fracg)
+        return (!signf);
+    if (fracf > fracg)
+        return (signf);
+    return (0);
 }
 
 /*
@@ -722,7 +751,15 @@ int floatIsLess(unsigned uf, unsigned ug)
  */
 unsigned floatNegate(unsigned uf)
 {
-    return 42;
+    int exp, frac;
+
+    exp = (uf >> 23) & 0xff;
+    frac = uf & 0x007fffff;
+
+    if (exp == 0xff && frac)
+        return (uf);
+
+    return uf ^ 0x80000000;
 }
 
 /*
@@ -741,7 +778,14 @@ unsigned floatNegate(unsigned uf)
  */
 unsigned floatPower2(int x)
 {
-    return 42;
+    x += 127;
+
+    if (x >= 0xff)
+        return (0x7f800000);
+    if (x <= 0)
+        return (0);
+
+    return x << 23;
 }
 
 /*
@@ -757,7 +801,31 @@ unsigned floatPower2(int x)
  */
 unsigned floatScale1d2(unsigned uf)
 {
-    return 42;
+    int sign, exp, frac, rem;
+
+    sign = uf & 0x80000000;
+    exp = (uf >> 23) & 0xff;
+    frac = uf & 0x007fffff;
+
+    if (!(uf << 1))
+        return (uf);
+
+    if (exp == 0xff)
+        return (uf);
+
+    if (exp > 1)
+        exp--;
+    else {
+        rem = frac & 0x1;
+        frac >>= 1;
+        frac += (frac & rem);
+        if (exp == 1) {
+            exp--;
+            frac |= 0x00400000;
+        }
+    }
+
+    return sign | (exp << 23) | frac;
 }
 
 /*
@@ -773,7 +841,29 @@ unsigned floatScale1d2(unsigned uf)
  */
 unsigned floatScale2(unsigned uf)
 {
-    return 42;
+    int sign, exp, frac;
+
+    sign = uf & 0x80000000;
+    exp = (uf >> 23) & 0xff;
+    frac = uf & 0x007fffff;
+
+    if (!(uf << 1))
+        return (uf);
+
+    if (exp == 0xff)
+        return (uf);
+
+    if (exp > 0)
+        exp++;
+    else {
+        if (((frac >> 22) & 0x1) == 0x1) {
+            exp++;
+        }
+        frac <<= 1;
+        frac &= 0x007fffff;
+    }
+
+    return sign | (exp << 23) | frac;
 }
 
 /*
@@ -789,7 +879,36 @@ unsigned floatScale2(unsigned uf)
  */
 unsigned floatScale64(unsigned uf)
 {
-    return 42;
+    int sign, exp, frac;
+    unsigned count = 0x1 << 5;
+
+    sign = uf & 0x80000000;
+    exp = (uf >> 23) & 0xff;
+    frac = uf & 0x007fffff;
+
+    if (!(uf << 1))
+        return (uf);
+
+    if (exp == 0xff && frac)
+        return (uf);
+
+    if (exp >= (0xff - 6))
+        return (0x7f800000 | sign);
+
+    while (count) {
+        if (exp > 0)
+            exp++;
+        else {
+            if (((frac >> 22) & 0x1) == 0x1) {
+                exp++;
+            }
+            frac <<= 1;
+            frac &= 0x007fffff;
+        }
+        count >>= 1;
+    }
+
+    return sign | (exp << 23) | frac;
 }
 
 /*
@@ -803,7 +922,42 @@ unsigned floatScale64(unsigned uf)
  */
 unsigned floatUnsigned2Float(unsigned u)
 {
-    return 42;
+    int Exp = 31, Man = (0x1 << 31), Rem, pos = 8;
+    unsigned filter = 0xffffff00;
+
+    if (!u)
+        return (0);
+
+    while (!(u & Man)) {
+        pos--;
+        Man >>= 1;
+        filter >>= 1;
+    }
+    Rem = u & ~(filter | Man);
+    if (pos > 0) {
+        if (Rem > 0 && (0x1 << pos) - Rem < Rem)
+            u += (1 << pos);
+        if ((0x1 << pos) - Rem == Rem && ((u >> pos) & 0x1) == 1)
+            u += (1 << pos);
+    }
+    Man = 0x1 << 31;
+
+    while (!(u & Man)) {
+        Exp--;
+        Man >>= 1;
+    }
+
+    if (Exp > 23)
+        Man = u >> (Exp - 23);
+    else
+        Man = u << (23 - Exp);
+
+    Man &= 0x007fffff;
+
+    Exp += 127;
+    Exp <<= 23;
+
+    return Exp | Man;
 }
 
 /*
