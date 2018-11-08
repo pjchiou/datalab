@@ -970,7 +970,7 @@ unsigned floatUnsigned2Float(unsigned u)
  */
 int getByte(int x, int n)
 {
-    return 42;
+    return (x >> (n << 3)) & 0xff;
 }
 
 /*
@@ -983,7 +983,16 @@ int getByte(int x, int n)
  */
 int greatestBitPos(int x)
 {
-    return 42;
+    int y, filter = ~(0x1 << 31);
+
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    y = (x >> 1) & filter;
+
+    return x ^ y;
 }
 
 /* howManyBits - return the minimum number of bits required to represent x in
@@ -1000,7 +1009,11 @@ int greatestBitPos(int x)
  */
 int howManyBits(int x)
 {
-    return 0;
+    int neg = x >> 31;
+
+    x ^= neg;
+
+    return 42;
 }
 
 /*
@@ -1014,7 +1027,7 @@ int howManyBits(int x)
  */
 int implication(int x, int y)
 {
-    return 42;
+    return (!x) | y;
 }
 
 /*
@@ -1041,7 +1054,13 @@ int intLog2(int x)
  */
 int isAsciiDigit(int x)
 {
-    return 42;
+    int low = 0x30, high = 0x3a, legal;
+
+    legal = !((~(0x3f)) & x);
+
+    x = ((x + (~low + 1)) >> 31) ^ ((x + (~high + 1)) >> 31);
+    x &= 0x1;
+    return (x & legal);
 }
 
 /*
@@ -1053,7 +1072,7 @@ int isAsciiDigit(int x)
  */
 int isEqual(int x, int y)
 {
-    return 42;
+    return !(x ^ y);
 }
 
 /*
@@ -1065,7 +1084,12 @@ int isEqual(int x, int y)
  */
 int isGreater(int x, int y)
 {
-    return 42;
+    int dis = x + ~y + 1, negx = x >> 31, negy = y >> 31, diff;
+
+    diff = negx ^ negy;
+    dis = (!!dis) & (~diff) & ((dis >> 31) + 1) & 0x1;
+    diff = (diff & ~negx) & 0x1;
+    return dis | diff;
 }
 
 /*
@@ -1077,7 +1101,12 @@ int isGreater(int x, int y)
  */
 int isLess(int x, int y)
 {
-    return 42;
+    int dis = y + ~x + 1, negx = x >> 31, negy = y >> 31, diff;
+
+    diff = negx ^ negy;
+    dis = (!!dis) & (~diff) & ((dis >> 31) + 1) & 0x1;
+    diff = (diff & ~negy) & 0x1;
+    return dis | diff;
 }
 
 /*
@@ -1089,7 +1118,12 @@ int isLess(int x, int y)
  */
 int isLessOrEqual(int x, int y)
 {
-    return 42;
+    int dis = y + ~x + 1, negx = x >> 31, negy = y >> 31, diff;
+
+    diff = negx ^ negy;
+    dis = (~diff) & ((dis >> 31) + 1) & 0x1;
+    diff = (diff & ~negy) & 0x1;
+    return dis | diff;
 }
 
 /*
@@ -1101,7 +1135,7 @@ int isLessOrEqual(int x, int y)
  */
 int isNegative(int x)
 {
-    return 42;
+    return !!(x >> 31);
 }
 
 /*
@@ -1113,7 +1147,7 @@ int isNegative(int x)
  */
 int isNonNegative(int x)
 {
-    return 42;
+    return !(x >> 31);
 }
 
 /*
@@ -1126,7 +1160,7 @@ int isNonNegative(int x)
  */
 int isNonZero(int x)
 {
-    return 42;
+    return !!(~x + 1);
 }
 
 /*
@@ -1138,7 +1172,7 @@ int isNonZero(int x)
  */
 int isNotEqual(int x, int y)
 {
-    return 42;
+    return !!(x ^ y);
 }
 
 /*
@@ -1162,7 +1196,7 @@ int isPallindrome(int x)
  */
 int isPositive(int x)
 {
-    return 42;
+    return !!x & !(x >> 31);
 }
 
 /*
@@ -1187,7 +1221,10 @@ int isPower2(int x)
  */
 int isTmax(int x)
 {
-    return 42;
+    int y = 0x1 << 30;
+    y <<= 1;
+    y -= 1;
+    return !(x ^ y);
 }
 
 /*
@@ -1199,7 +1236,10 @@ int isTmax(int x)
  */
 int isTmin(int x)
 {
-    return 42;
+    int y = 0x1 << 30;
+    y <<= 1;
+
+    return !(x ^ y);
 }
 
 /*
@@ -1211,7 +1251,7 @@ int isTmin(int x)
  */
 int isZero(int x)
 {
-    return 42;
+    return !(x ^ 0);
 }
 
 /*
@@ -1224,7 +1264,9 @@ int isZero(int x)
  */
 int leastBitPos(int x)
 {
-    return 42;
+    int filter = x ^ (x - 1);
+
+    return (x & filter) & x;
 }
 
 /*
@@ -1250,7 +1292,9 @@ int leftBitCount(int x)
  */
 int logicalNeg(int x)
 {
-    return 42;
+    int neg = x >> 31;
+    x = (x ^ (~neg)) + (neg + 1);
+    return (~(x >> 31)) & 0x1;
 }
 
 /*
@@ -1263,7 +1307,9 @@ int logicalNeg(int x)
  */
 int logicalShift(int x, int n)
 {
-    return 42;
+    int filter = 0x1 << (31 - n);
+    filter = (filter - 1) ^ filter;
+    return (x >> n) & filter;
 }
 
 /*
@@ -1296,7 +1342,7 @@ int minimumOfTwo(int x, int y)
  */
 int minusOne(void)
 {
-    return 42;
+    return ~0;
 }
 
 /*
